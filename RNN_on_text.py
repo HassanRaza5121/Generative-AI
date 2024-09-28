@@ -41,8 +41,55 @@ class Positional_Encoding(Embeddings):
             else:
                 pos_e[position,d] = np.cos(position / (10000 ** (d / dim))) 
         return pos_e
+
+class EncoderRNN(nn.Module):
+    def __init__(self,input_size,hidden_size,output_size):
+        super(EncoderRNN,self).__init__()
+        self.hidden_size = hidden_size
+        self.fc_input = nn.Linear(input_size,hidden_size)
+        self.fc1_hidden = nn.Linear(hidden_size,hidden_size)
+        self.fc2_hidden = nn.Linear(hidden_size,hidden_size)
+        self.fc_output = nn.Linear(hidden_size,output_size)
+        self.sigmoid = nn.Sigmoid()
+    def forward(self,x,h_prev):
+        x1 = self.sigmoid((self.fc_input(x)))
+        h_t = self.sigmoid(self.fc1_hidden(h_prev)+x1)
+        h_t_1 = self.sigmoid(self.fc2_hidden(h_t))
+        output = self.sigmoid(self.fc_output(h_t_1))
+        return output
+class DecoderRNN(nn.Module):
+    def __init__(self,hidden_size,output_size):
+        super(DecoderRNN,self).__init__()
+        self.hidden_size = hidden_size
+        self.embeddings = nn.Embedding(output_size,hidden_size)
+        self.gru = nn.GRU(hidden_size,hidden_size)
+        self.output = nn.Linear(hidden_size,output_size)
+        self.softmax = nn.sof
+    def forward(self,embeddings_of_enc,hidden):
+        embeddings = self.embeddings(embeddings_of_enc).view(1,-1,1)
+        output,hidden = self.gru(embeddings,hidden)
+        output = self.output(output[0])
+        return output,hidden
+    
+
+
+
+
 file_name = 'file.txt'
-obj = Embeddings(file_name)
-obj2 = Positional_Encoding(file_name)
-print(obj2.positional_Encoding())
+obj_of_embeddings = Embeddings(file_name)
+obj_of_pe = Positional_Encoding(file_name)
+
+pe = obj_of_pe.positional_Encoding()
+emb = obj_of_embeddings.word_embeddings()
+sum_of_pe_embeddings = pe + emb
+x = torch.tensor(sum_of_pe_embeddings)
+
+obj_of_RNN = EncoderRNN(100,256,16)
+h_prev = torch.zeros(256,dtype=torch.float32) # hidden size
+x = x.float()
+
+print(obj_of_RNN.forward(x,h_prev))
+
+
+
 
