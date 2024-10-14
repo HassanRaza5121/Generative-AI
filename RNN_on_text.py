@@ -107,7 +107,8 @@ print("Encoder Output Shape:", encoder_output.shape)  # Expected: [16, 16]
 
 # Forward pass through Decoder
 decoder_output, new_h_t_1 = decoder(encoder_output, h_t_1)
-print("Decoder Output Shape:", decoder_output)  # Expected: [16, decoder_output_dim]
+
+print("Decoder Output Shape:", decoder_output.shape)  # Expected: [16, decoder_output_dim]
 
 
 
